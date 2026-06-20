@@ -60,6 +60,21 @@ import Link from "next/link";
 즉시 반영이 필요하면 페이지에서 `revalidatePath("/jobs")`를 호출하거나 Vercel 재배포하세요.
 Contest Radar의 Cowork 수집 작업에 `source='cowork'`로 upsert하는 스텝을 붙이면 완전 자동화됩니다.
 
+## 자동 수집 (주간 루틴)
+
+`automation/` 에 클라우드 에이전트가 따르는 작업 명세가 있습니다.
+
+```
+automation/
+  companies.json        # 추적 회사 14곳 (key, careers_url, is_global)
+  research-routine.md    # 주차 계산 → 리서치·검증 → jobradar_jobs upsert → 만료 롤오버
+```
+
+매주 일요일 08:00 KST에 실행되어 추적 회사들의 PM·서비스기획 공고를 검색·검증하고
+`jobradar_jobs`에 `(company_key, title)` 기준으로 upsert합니다. **검증된 실제 공고만** `open`으로
+노출하며, 명세를 수정(회사 추가·매핑 규칙 변경)하면 다음 실행부터 반영됩니다.
+루틴 관리: https://claude.ai/code/routines
+
 ## RLS 요약 (이미 적용됨)
 
 - `jobradar_jobs` / `jobradar_companies` → 누구나 읽기, 단 공고는 `status='open'`만 노출
