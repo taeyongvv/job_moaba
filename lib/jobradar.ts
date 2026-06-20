@@ -55,3 +55,35 @@ export function formatDeadline(d: string | null): string | null {
   const x = new Date(d);
   return `${String(x.getMonth() + 1).padStart(2, "0")}/${String(x.getDate()).padStart(2, "0")}`;
 }
+
+/**
+ * 공개(open) 공고 데이터의 마지막 갱신 시각(ISO 문자열).
+ * 정적 export에서는 빌드 시점에 한 번 조회되어, 그때의 DB 기준 시각을 보여준다.
+ */
+export async function getDataUpdatedAt(): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("jobradar_jobs")
+    .select("updated_at")
+    .eq("status", "open")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  return (data as { updated_at: string }).updated_at;
+}
+
+/** ISO -> '2026.06.21 00:39 KST' (Asia/Seoul) */
+export function formatKST(iso: string | null): string | null {
+  if (!iso) return null;
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(iso));
+  const g = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${g("year")}.${g("month")}.${g("day")} ${g("hour")}:${g("minute")} KST`;
+}

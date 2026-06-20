@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
-import { getJobs } from "@/lib/jobradar";
+import { getJobs, getDataUpdatedAt, formatKST } from "@/lib/jobradar";
 import JobsBoard from "./JobsBoard";
 import SubscribeForm from "./SubscribeForm";
 import styles from "./jobs.module.css";
@@ -30,6 +30,7 @@ export default async function JobsPage() {
   const jobs = await getJobs();
   const companyCount = new Set(jobs.map((j) => j.company_key)).size;
   const globalCount = jobs.filter((j) => j.is_global).length;
+  const updatedAt = formatKST(await getDataUpdatedAt());
 
   return (
     <div className={`${styles.page} ${spaceGrotesk.variable} ${jetbrains.variable}`}>
@@ -45,7 +46,9 @@ export default async function JobsPage() {
             <span className={styles.dot} />
             JOB&nbsp;RADAR
           </div>
-          <div className={styles.sub}>PM · 서비스기획 · ✉️ #49</div>
+          <div className={styles.sub}>
+            PM · 서비스기획{updatedAt ? ` · 데이터 ${updatedAt}` : ""}
+          </div>
         </div>
       </div>
 
@@ -120,6 +123,12 @@ export default async function JobsPage() {
           제공합니다.
         </div>
         <div className={styles.dis}>
+          {updatedAt && (
+            <>
+              데이터 기준 시각: <b>{updatedAt}</b>
+              <br />
+            </>
+          )}
           * 일자는 접수 마감일 기준이며 &quot;상시&quot;는 상시 채용입니다. 데이터는
           Supabase(jobradar_v_jobs)에서 불러오며, 최종 내용은 각 사 채용 페이지에서 확인하세요.
         </div>
