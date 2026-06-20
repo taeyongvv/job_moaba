@@ -256,12 +256,11 @@
 }
 .chiprow {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 7px;
-  overflow-x: auto;
   padding-top: 11px;
-  scrollbar-width: none;
 }
-.chiprow::-webkit-scrollbar { display: none; }
 .chip {
   font-family: var(--body);
   font-size: 12.5px;
