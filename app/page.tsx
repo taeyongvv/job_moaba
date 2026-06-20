@@ -22,8 +22,9 @@ export const metadata: Metadata = {
     "국내 주요 테크 기업부터 글로벌 AI·엔터까지, PM·서비스기획 채용을 경력 단계별로 정리한 주간 채용 레이더.",
 };
 
-// 요청 시점 데이터 + 5분 ISR
-export const revalidate = 300;
+// GitHub Pages = 정적 export: 데이터는 빌드 시점에 고정됨.
+// 갱신은 GitHub Actions 주간 재빌드(또는 수동 트리거)로 수행.
+export const dynamic = "force-static";
 
 export default async function JobsPage() {
   const jobs = await getJobs();

@@ -1,64 +1,57 @@
-# JOB RADAR — Contest Radar `/jobs` 하위 라우트
+# JOB RADAR — 주간 PM·서비스기획 채용 레이더
 
-Contest Radar(Next.js App Router) 프로젝트에 그대로 떨어뜨리면 `/jobs` 경로가 생기는 파일 세트입니다.
-백엔드는 이미 적용된 같은 Supabase 프로젝트(`ricecookey-contests`)의 `jobradar_*` 테이블을 읽습니다.
+**라이브: https://taeyongvv.github.io/job_moaba/**
 
-## 파일 배치
+주요 테크 기업 + 글로벌 AI·엔터의 PM·서비스기획 공고를 경력 단계별로 정리한 주간 채용 보드입니다.
+백엔드는 Supabase 프로젝트(`ricecookey-contests`)의 `jobradar_*` 테이블을 읽습니다.
 
-프로젝트 루트 기준으로 아래 위치에 복사하세요.
+## 배포 (GitHub Pages)
+
+GitHub Actions가 Next.js를 **정적 export**(`output: "export"`, `basePath: "/job_moaba"`)로 빌드해
+GitHub Pages에 배포합니다. 트리거: `main` 푸시 / 매주 토 23:30 UTC(주간 수집 직후) / 수동 실행.
+
+- 데이터는 **빌드 시점에 고정**됩니다. 새 공고를 반영하려면 재빌드(주간 자동 또는 Actions 수동 실행).
+- 빌드에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 필요 — repo Actions secrets에 등록됨.
+
+## 프로젝트 구조
 
 ```
 app/
-  jobs/
-    page.tsx          # 라우트 진입점 (Server Component, 데이터 fetch + 레이아웃)
-    JobsBoard.tsx     # 검색·필터·카드 목록 (Client Component)
-    SubscribeForm.tsx # 구독 폼 (Client Component → Server Action 호출)
-    actions.ts        # subscribe Server Action
-    jobs.module.css   # 페이지 전용 스타일 (스코프됨, Tailwind 설정 무관)
+  layout.tsx          # 루트 레이아웃
+  page.tsx            # 보드 (Server Component, 빌드 시 getJobs())
+  JobsBoard.tsx       # 검색·필터·카드 목록 (Client Component)
+  SubscribeForm.tsx   # 구독 폼 (Client → Supabase anon 키로 직접 insert)
+  jobs.module.css     # 페이지 전용 스타일 (스코프됨)
 lib/
   jobradar.ts         # 타입 + getJobs() 데이터 액세스
+  supabaseClient.ts   # 브라우저용 Supabase 클라이언트 (구독 insert)
+automation/           # 주간 수집 루틴 명세 (아래 참고)
+.github/workflows/deploy.yml
 ```
 
-## 전제 조건 (Contest Radar에 이미 있을 것)
-
-- **의존성**: `@supabase/supabase-js` (Contest Radar에서 이미 사용 중). 없다면 `npm i @supabase/supabase-js`
-- **환경변수**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  → 동일한 Supabase 프로젝트라 기존 `.env.local` / Vercel 환경변수를 그대로 씁니다. 추가 설정 불필요.
-- **경로 별칭**: `@/*` (Next.js 기본 `tsconfig.json` 설정). `@/lib/jobradar` import가 이걸 씁니다.
-- **next/font**: `Space_Grotesk`, `JetBrains_Mono`를 Google Fonts로 불러옵니다(빌드 시 자동 셀프호스팅). 한글은 Pretendard를 page에서 `<link>`로 로드합니다.
-
-## 확인
+### 로컬 개발
 
 ```bash
-npm run dev
-# http://localhost:3000/jobs
-```
-
-상단 필터바에 `Supabase · LIVE` 배지가 보이면 DB에서 실시간으로 읽고 있는 것입니다.
-
-## 내비게이션 링크 추가 (선택)
-
-기존 헤더/네비 컴포넌트에 한 줄 추가하면 됩니다.
-
-```tsx
-import Link from "next/link";
-// ...
-<Link href="/jobs">채용</Link>
+npm install
+# .env.local 에 NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY 설정
+npm run dev    # http://localhost:3000  (basePath 때문에 /job_moaba 경로로 접속)
+npm run build  # 정적 export → out/
 ```
 
 ## 동작 방식
 
-- `app/jobs/page.tsx`는 **Server Component**로, 요청 시 `getJobs()`가 `jobradar_v_jobs` 뷰에서
-  `status='open'` 공고를 가져옵니다. `export const revalidate = 300`으로 5분마다 재생성(ISR)됩니다.
+- `app/page.tsx`는 Server Component지만 정적 export라 **빌드 시점**에 `getJobs()`가 `jobradar_v_jobs`
+  뷰에서 `status='open'` 공고를 읽어 HTML에 구워 넣습니다 (`export const dynamic = "force-static"`).
 - 검색·회사·경력 필터는 **클라이언트에서** 처리(`JobsBoard.tsx`)하므로 추가 네트워크 호출이 없습니다.
-- 구독은 **Server Action**(`actions.ts`)이 `jobradar_subscribers`에 insert합니다.
-  이메일 형식은 클라이언트·서버·DB(RLS WITH CHECK) 3중으로 검증됩니다.
+- 구독은 정적 호스팅이라 Server Action 대신 **클라이언트에서 Supabase anon 키로 직접 insert**합니다
+  (`SubscribeForm.tsx` → `lib/supabaseClient.ts`). 이메일 형식은 클라이언트·DB(RLS WITH CHECK)에서 검증됩니다.
+- 폰트: `Space_Grotesk`, `JetBrains_Mono`는 빌드 시 셀프호스팅, 한글 Pretendard는 CDN `<link>`.
 
 ## 데이터 갱신 (주차 운영)
 
-새 공고는 `jobradar_jobs`에 `(company_key, title)` 기준 upsert하면 페이지가 5분 내 자동 반영됩니다.
-즉시 반영이 필요하면 페이지에서 `revalidatePath("/jobs")`를 호출하거나 Vercel 재배포하세요.
-Contest Radar의 Cowork 수집 작업에 `source='cowork'`로 upsert하는 스텝을 붙이면 완전 자동화됩니다.
+새 공고는 `jobradar_jobs`에 `(company_key, title)` 기준으로 upsert하면, **다음 빌드** 때 페이지에 반영됩니다.
+즉시 반영하려면 GitHub Actions의 `Deploy to GitHub Pages` 워크플로를 수동 실행(`workflow_dispatch`)하세요.
+정기 갱신은 아래 자동 수집 루틴 + 주간 재빌드(토 23:30 UTC)로 완전 자동화됩니다.
 
 ## 자동 수집 (주간 루틴)
 
