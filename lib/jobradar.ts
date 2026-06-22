@@ -99,15 +99,28 @@ export function regionOf(job: Pick<Job, "is_global" | "company_key">): Region {
   return METRO_COMPANIES.has(job.company_key) ? "metro" : "domestic";
 }
 
-// 보드에 노출하는 정규 회사 집합 — 네카라쿠배당토(계열사 포함) + 글로벌 3사.
-// 이 집합 밖(예: 몰로코·센드버드·우아한청년들)의 공고는 화면에서 제외한다.
+// 개별 공고를 카드로 노출하는 회사 — 링크 검증이 가능한 곳.
+// 네이버·카카오·카카오뱅크·라인은 SPA/봇차단이라 개별 공고 검증이 불가능해 제외하고,
+// 대신 CAREERS_FALLBACK의 '채용 페이지 바로가기' 카드로 대체한다.
 export const TRACKED_COMPANIES = new Set<string>([
-  "toss", "coupang", "baemin",
-  "naver", "webtoon", "line",
-  "kakao", "kakaopay", "kakaobank",
-  "daangn",
+  "toss", "coupang", "baemin", "webtoon",
+  "kakaopay", "daangn",
   "anthropic", "openai", "disney",
 ]);
+
+// 검증 불가(SPA/봇차단) 회사 — 개별 공고 대신 채용 목록/검색 페이지로 바로 연결한다.
+// 채용 공고는 빨리 마감되므로 항상 열리는 채용 페이지가 더 신뢰성 있다.
+export const CAREERS_FALLBACK: {
+  company_key: string;
+  name: string;
+  color: string;
+  careers_url: string;
+}[] = [
+  { company_key: "naver", name: "네이버", color: "#03C75A", careers_url: "https://recruit.navercorp.com/" },
+  { company_key: "kakao", name: "카카오", color: "#FEE500", careers_url: "https://careers.kakao.com/jobs" },
+  { company_key: "kakaobank", name: "카카오뱅크", color: "#FED007", careers_url: "https://recruit.kakaobank.com/" },
+  { company_key: "line", name: "라인", color: "#06C755", careers_url: "https://careers.linecorp.com/ko/jobs" },
+];
 
 export async function getJobs(): Promise<Job[]> {
   const { data, error } = await supabase

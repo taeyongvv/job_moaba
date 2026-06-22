@@ -1,15 +1,11 @@
 {
-  "_comment": "JOB RADAR 추적 회사. company_key는 jobradar_companies.key(FK)와 일치해야 함. group/region은 프론트 필터용 분류(lib/jobradar.ts의 GROUPS/REGION과 동기화). region: metro=서울·경기, domestic=국내 비수도권, global=해외. 새 회사 추가 시 먼저 jobradar_companies에 INSERT.",
+  "_comment": "JOB RADAR 개별공고 수집 대상 회사(링크 검증 가능한 곳만). naver·kakao·kakaobank·line은 SPA/봇차단이라 개별공고 검증이 불가해 여기서 제외하고, 프론트의 CAREERS_FALLBACK(채용 페이지 바로가기 카드)로 대체한다. company_key는 jobradar_companies.key(FK)와 일치. region: metro=서울·경기, domestic=국내 비수도권, global=해외.",
   "domestic": [
     { "key": "toss",       "name": "토스",        "group": null,    "region": "metro", "careers_url": "https://toss.im/career" },
     { "key": "coupang",    "name": "쿠팡",        "group": null,    "region": "metro", "careers_url": "https://www.coupang.jobs" },
     { "key": "baemin",     "name": "우아한형제들", "group": null,    "region": "metro", "careers_url": "https://career.woowahan.com" },
-    { "key": "naver",      "name": "네이버",      "group": "naver", "region": "metro", "careers_url": "https://recruit.navercorp.com" },
     { "key": "webtoon",    "name": "네이버웹툰",   "group": "naver", "region": "metro", "careers_url": "https://recruit.webtoonscorp.com" },
-    { "key": "line",       "name": "라인",        "group": null,    "region": "metro", "careers_url": "https://careers.linecorp.com" },
-    { "key": "kakao",      "name": "카카오",      "group": "kakao", "region": "metro", "careers_url": "https://careers.kakao.com" },
     { "key": "kakaopay",   "name": "카카오페이",   "group": "kakao", "region": "metro", "careers_url": "https://kakaopay.career.greetinghr.com" },
-    { "key": "kakaobank",  "name": "카카오뱅크",   "group": "kakao", "region": "metro", "careers_url": "https://recruit.kakaobank.com" },
     { "key": "daangn",     "name": "당근",        "group": null,    "region": "metro", "careers_url": "https://about.daangn.com/jobs" }
   ],
   "global": [

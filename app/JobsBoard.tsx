@@ -5,6 +5,7 @@ import {
   TIERS,
   REGIONS,
   COMPANY_FILTER,
+  CAREERS_FALLBACK,
   groupOf,
   regionOf,
   formatDeadline,
@@ -43,6 +44,20 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
       return true;
     });
   }, [jobs, activeSel, activeRegion, activeTier, query]);
+
+  // '채용 페이지 바로가기' 카드 (검증 불가 회사) — 회사/그룹·근무지·검색 필터는 적용,
+  // 경력(tier) 필터가 걸리면 숨김(개별 공고가 아니라 회사 단위라 tier가 없음).
+  const fallbackShown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (activeTier !== "all") return [];
+    if (activeRegion === "global") return []; // 모두 국내(수도권)
+    return CAREERS_FALLBACK.filter((c) => {
+      if (activeSel.startsWith("co:") && c.company_key !== activeSel.slice(3)) return false;
+      if (activeSel.startsWith("grp:") && groupOf(c.company_key) !== activeSel.slice(4)) return false;
+      if (q && !`${c.name} ${c.company_key} 채용`.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [activeSel, activeRegion, activeTier, query]);
 
   const reset = () => {
     setActiveSel("all");
@@ -152,7 +167,23 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
       </div>
 
       <main className={styles.board}>
-        {shown.length === 0 ? (
+        {fallbackShown.length > 0 && (
+          <section className={styles.tier}>
+            <div className={styles.tierHead}>
+              <span className={styles.bar} style={{ background: "#9AA0A6" }} />
+              <h2>채용 페이지 바로가기</h2>
+              <span className={styles.ct}>{fallbackShown.length}</span>
+            </div>
+            <p className={styles.fallbackNote}>
+              개별 공고 링크가 빠르게 마감돼, 아래 회사는 항상 열려 있는 채용 페이지로 연결합니다.
+            </p>
+            {fallbackShown.map((c) => (
+              <FallbackCard key={c.company_key} item={c} />
+            ))}
+          </section>
+        )}
+
+        {shown.length === 0 && fallbackShown.length === 0 ? (
           <div className={styles.empty}>
             <h3>조건에 맞는 공고가 없어요</h3>
             <p>회사나 경력 필터를 바꾸거나 필터를 초기화해 보세요.</p>
@@ -177,6 +208,45 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
         )}
       </main>
     </>
+  );
+}
+
+function FallbackCard({
+  item,
+}: {
+  item: { company_key: string; name: string; color: string; careers_url: string };
+}) {
+  return (
+    <a
+      className={styles.card}
+      href={item.careers_url}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ "--accent": item.color } as CSSProperties}
+      aria-label={`${item.name} 채용 페이지`}
+    >
+      <div className={styles.deadline}>
+        채용<small>바로가기</small>
+      </div>
+      <div className={styles.cardBody}>
+        <div className={styles.co}>
+          <span className={styles.cdot} style={{ background: item.color }} />
+          <span className={styles.name}>{item.name}</span>
+        </div>
+        <div className={styles.title}>PM·서비스기획 채용 보기</div>
+      </div>
+      <svg
+        className={styles.go}
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    </a>
   );
 }
 
