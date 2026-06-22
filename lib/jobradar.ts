@@ -43,7 +43,7 @@ export type GroupKey = "kakao" | "naver";
 
 export const GROUPS: { key: GroupKey; label: string; color: string; members: string[] }[] = [
   { key: "kakao", label: "카카오", color: "#FEE500", members: ["kakao", "kakaopay", "kakaobank"] },
-  { key: "naver", label: "네이버", color: "#03C75A", members: ["naver", "webtoon", "line"] },
+  { key: "naver", label: "네이버", color: "#03C75A", members: ["naver", "webtoon"] },
 ];
 
 const GROUP_OF: Record<string, GroupKey> = GROUPS.reduce(
@@ -60,13 +60,16 @@ export const groupOf = (companyKey: string): GroupKey | null =>
 // 회사 필터에 항상 노출하는 고정 목록 — 네카라쿠배당토(라인은 네이버 그룹에 포함) + 글로벌 3사.
 // 공고가 0건인 회사도 칩은 항상 보이게 한다(데이터 의존 X).
 // kind 'grp'는 계열사를 묶은 단일 칩(네이버=naver/webtoon/line, 카카오=kakao/kakaopay/kakaobank).
+// 네카라쿠배당토 순: 네이버 · 카카오 · 라인 · 쿠팡 · 배민 · 당근 · 토스, 그 뒤 글로벌 3사.
+// (네이버=naver/webtoon 묶음, 카카오=kakao/kakaopay/kakaobank 묶음, 라인은 독립)
 export const COMPANY_FILTER: { kind: "co" | "grp"; key: string; name: string; color: string }[] = [
-  { kind: "co", key: "toss", name: "토스", color: "#3182F6" },
-  { kind: "co", key: "coupang", name: "쿠팡", color: "#C81E2E" },
-  { kind: "co", key: "baemin", name: "배민", color: "#2AC1BC" },
   { kind: "grp", key: "naver", name: "네이버", color: "#03C75A" },
   { kind: "grp", key: "kakao", name: "카카오", color: "#FEE500" },
+  { kind: "co", key: "line", name: "라인", color: "#06C755" },
+  { kind: "co", key: "coupang", name: "쿠팡", color: "#C81E2E" },
+  { kind: "co", key: "baemin", name: "배민", color: "#2AC1BC" },
   { kind: "co", key: "daangn", name: "당근", color: "#FF6F0F" },
+  { kind: "co", key: "toss", name: "토스", color: "#3182F6" },
   { kind: "co", key: "anthropic", name: "Anthropic", color: "#CC785C" },
   { kind: "co", key: "openai", name: "OpenAI", color: "#10A37F" },
   { kind: "co", key: "disney", name: "Disney", color: "#2B49C9" },

@@ -6,7 +6,7 @@
     { "key": "baemin",     "name": "우아한형제들", "group": null,    "region": "metro", "careers_url": "https://career.woowahan.com" },
     { "key": "naver",      "name": "네이버",      "group": "naver", "region": "metro", "careers_url": "https://recruit.navercorp.com" },
     { "key": "webtoon",    "name": "네이버웹툰",   "group": "naver", "region": "metro", "careers_url": "https://recruit.webtoonscorp.com" },
-    { "key": "line",       "name": "라인",        "group": "naver", "region": "metro", "careers_url": "https://careers.linecorp.com" },
+    { "key": "line",       "name": "라인",        "group": null,    "region": "metro", "careers_url": "https://careers.linecorp.com" },
     { "key": "kakao",      "name": "카카오",      "group": "kakao", "region": "metro", "careers_url": "https://careers.kakao.com" },
     { "key": "kakaopay",   "name": "카카오페이",   "group": "kakao", "region": "metro", "careers_url": "https://kakaopay.career.greetinghr.com" },
     { "key": "kakaobank",  "name": "카카오뱅크",   "group": "kakao", "region": "metro", "careers_url": "https://recruit.kakaobank.com" },
