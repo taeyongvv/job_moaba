@@ -43,7 +43,8 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
         if (seenGroup.has(g)) return;
         seenGroup.add(g);
         const meta = GROUPS.find((x) => x.key === g)!;
-        out.push({ kind: "grp", key: g, name: `${meta.label} 그룹`, color: meta.color });
+        // 계열사를 묶어 하나의 회사("카카오"/"네이버")처럼 노출 (별도 그룹 카테고리 없이)
+        out.push({ kind: "grp", key: g, name: meta.label, color: meta.color });
       } else {
         out.push({ kind: "co", key: c.key, name: c.name, color: c.color });
       }
