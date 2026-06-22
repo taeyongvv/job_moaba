@@ -14,6 +14,15 @@ upsert하여 `/jobs` 페이지를 최신 상태로 유지한다.
 1. **날조 금지.** 웹 검색으로 **실제 공고 URL(apply_url)** 을 확인하지 못하면 그 공고는 넣지 않는다.
    apply_url은 반드시 해당 회사의 채용 도메인(`companies.json`의 careers_url 호스트) 또는
    알려진 ATS(greenhouse.io, lever.co, greetinghr.com, ashbyhq.com 등)로 실제 연결되어야 한다.
+1-1. **링크 생존 검증 의무 (중요).** upsert 전에 모든 apply_url을 **WebFetch로 직접 열어** 살아있는
+   공고인지 확인한다. 다음 중 하나라도 해당하면 **그 공고는 넣지 않는다(skip)**:
+   - HTTP 404 / 410 / 5xx, 또는 "페이지를 찾을 수 없음 / not found / 마감 / no longer available" 표시
+   - Greenhouse에서 `...?error=true`(존재하지 않는 jobId) 또는 공고 목록/홈으로 리다이렉트
+   - apply_url이 특정 공고가 아니라 채용 **목록/홈/검색** 페이지로 떨어지는 경우
+   - WebFetch가 403 등으로 차단되어 **살아있음을 확인할 수 없는** 경우 (불확실하면 넣지 않는다)
+   ID를 추측해 URL을 만들지 말 것. 검색 결과의 실제 링크를 그대로 쓰고, 그 링크를 검증한다.
+   주의: 카카오(careers.kakao.com)·라인(careers.linecorp.com)·쿠팡(coupang.jobs)은 봇 차단/SPA라
+   검증이 어렵다. 검증되는 공고만 넣고, 안 되면 건너뛴다(개수보다 정확도).
 2. **마감일을 지어내지 않는다.** 명시된 마감일을 확인 못 하면 `deadline = null`(상시)로 둔다.
 3. 범위는 **PM / 서비스기획 / Product Manager / Product Owner / 프로덕트 기획** 직무로 한정.
    엔지니어링·디자인·마케팅 단독 공고는 제외.
