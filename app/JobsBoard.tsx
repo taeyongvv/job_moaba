@@ -33,11 +33,23 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
     return [...seen.entries()].map(([key, v]) => ({ key, ...v }));
   }, [jobs]);
 
-  // 데이터에 실제로 등장하는 그룹만 칩으로 노출
-  const groupsShown = useMemo(() => {
-    const present = new Set(jobs.map((j) => j.company_key));
-    return GROUPS.filter((g) => g.members.some((m) => present.has(m)));
-  }, [jobs]);
+  // 회사 칩: 그룹사(카카오·네이버 계열)는 하나의 "그룹" 칩으로 묶어서 노출
+  const companyChips = useMemo(() => {
+    const out: { kind: "co" | "grp"; key: string; name: string; color: string }[] = [];
+    const seenGroup = new Set<string>();
+    companies.forEach((c) => {
+      const g = groupOf(c.key);
+      if (g) {
+        if (seenGroup.has(g)) return;
+        seenGroup.add(g);
+        const meta = GROUPS.find((x) => x.key === g)!;
+        out.push({ kind: "grp", key: g, name: `${meta.label} 그룹`, color: meta.color });
+      } else {
+        out.push({ kind: "co", key: c.key, name: c.name, color: c.color });
+      }
+    });
+    return out;
+  }, [companies]);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -97,26 +109,6 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
             ))}
           </div>
 
-          {groupsShown.length > 0 && (
-            <div className={styles.chiprow}>
-              <span className={styles.chipLabel}>그룹</span>
-              {groupsShown.map((g) => {
-                const token = `grp:${g.key}`;
-                return (
-                  <button
-                    key={g.key}
-                    type="button"
-                    className={styles.chip}
-                    aria-pressed={activeSel === token}
-                    onClick={() => setActiveSel(activeSel === token ? "all" : token)}
-                  >
-                    {g.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
           <div className={styles.chiprow}>
             <span className={styles.chipLabel}>회사</span>
             <button
@@ -127,18 +119,21 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
             >
               전체
             </button>
-            {companies.map((c) => (
-              <button
-                key={c.key}
-                type="button"
-                className={styles.chip}
-                aria-pressed={activeSel === `co:${c.key}`}
-                onClick={() => setActiveSel(`co:${c.key}`)}
-              >
-                <span className={styles.cdot} style={{ background: c.color }} />
-                {c.name}
-              </button>
-            ))}
+            {companyChips.map((c) => {
+              const token = `${c.kind}:${c.key}`;
+              return (
+                <button
+                  key={token}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={activeSel === token}
+                  onClick={() => setActiveSel(token)}
+                >
+                  <span className={styles.cdot} style={{ background: c.color }} />
+                  {c.name}
+                </button>
+              );
+            })}
           </div>
 
           <div className={styles.chiprow}>

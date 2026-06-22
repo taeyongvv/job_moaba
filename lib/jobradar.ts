@@ -41,9 +41,9 @@ export const TIERS: { id: Tier; label: string; color: string }[] = [
 // company_key → 소속 그룹. 그룹 칩 하나로 계열사 공고를 묶어서 본다.
 export type GroupKey = "kakao" | "naver";
 
-export const GROUPS: { key: GroupKey; label: string; members: string[] }[] = [
-  { key: "kakao", label: "카카오", members: ["kakao", "kakaopay", "kakaobank"] },
-  { key: "naver", label: "네이버", members: ["naver", "webtoon", "line"] },
+export const GROUPS: { key: GroupKey; label: string; color: string; members: string[] }[] = [
+  { key: "kakao", label: "카카오", color: "#FEE500", members: ["kakao", "kakaopay", "kakaobank"] },
+  { key: "naver", label: "네이버", color: "#03C75A", members: ["naver", "webtoon", "line"] },
 ];
 
 const GROUP_OF: Record<string, GroupKey> = GROUPS.reduce(
