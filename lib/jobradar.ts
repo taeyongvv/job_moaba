@@ -37,6 +37,50 @@ export const TIERS: { id: Tier; label: string; color: string }[] = [
   { id: 4, label: "경력 7년+", color: "var(--t4)" },
 ];
 
+// ── 그룹사 통합 필터 ──────────────────────────────────────────
+// company_key → 소속 그룹. 그룹 칩 하나로 계열사 공고를 묶어서 본다.
+export type GroupKey = "kakao" | "naver";
+
+export const GROUPS: { key: GroupKey; label: string; members: string[] }[] = [
+  { key: "kakao", label: "카카오", members: ["kakao", "kakaopay", "kakaobank"] },
+  { key: "naver", label: "네이버", members: ["naver", "webtoon", "line"] },
+];
+
+const GROUP_OF: Record<string, GroupKey> = GROUPS.reduce(
+  (acc, g) => {
+    g.members.forEach((m) => (acc[m] = g.key));
+    return acc;
+  },
+  {} as Record<string, GroupKey>,
+);
+
+export const groupOf = (companyKey: string): GroupKey | null =>
+  GROUP_OF[companyKey] ?? null;
+
+// ── 근무지(지역) 필터 ─────────────────────────────────────────
+// global = is_global, metro = 국내 수도권(서울·경기), domestic = 국내 비수도권.
+// 서울·경기(metro)는 국내(domestic 포함)의 부분집합으로 취급한다.
+export type Region = "metro" | "domestic" | "global";
+
+// 국내사 중 수도권(서울·경기)에 주 근무지가 있는 회사. (글로벌사는 is_global로 자동 분류)
+const METRO_COMPANIES = new Set<string>([
+  "toss", "coupang", "baemin", "woowa", "line", "kakao", "kakaopay",
+  "kakaobank", "daangn", "webtoon", "naver", "moloco", "sendbird",
+]);
+
+export const REGIONS: { id: "all" | Region; label: string }[] = [
+  { id: "all", label: "전체" },
+  { id: "metro", label: "서울·경기" },
+  { id: "domestic", label: "국내" },
+  { id: "global", label: "글로벌" },
+];
+
+/** 공고의 지역 분류. 글로벌이면 global, 아니면 회사 수도권 여부로 metro/domestic. */
+export function regionOf(job: Pick<Job, "is_global" | "company_key">): Region {
+  if (job.is_global) return "global";
+  return METRO_COMPANIES.has(job.company_key) ? "metro" : "domestic";
+}
+
 export async function getJobs(): Promise<Job[]> {
   const { data, error } = await supabase
     .from("jobradar_v_jobs")

@@ -1,21 +1,23 @@
 {
-  "_comment": "JOB RADAR 추적 회사 목록. company_key는 jobradar_companies.key(FK)와 일치해야 함. 새 회사를 추가하려면 먼저 jobradar_companies에 INSERT한 뒤 여기에 추가할 것.",
+  "_comment": "JOB RADAR 추적 회사. company_key는 jobradar_companies.key(FK)와 일치해야 함. group/region은 프론트 필터용 분류(lib/jobradar.ts의 GROUPS/REGION과 동기화). region: metro=서울·경기, domestic=국내 비수도권, global=해외. 새 회사 추가 시 먼저 jobradar_companies에 INSERT.",
   "domestic": [
-    { "key": "toss",       "name": "토스",        "careers_url": "https://toss.im/career" },
-    { "key": "coupang",    "name": "쿠팡",        "careers_url": "https://www.coupang.jobs" },
-    { "key": "baemin",     "name": "우아한형제들", "careers_url": "https://career.woowahan.com" },
-    { "key": "woowa",      "name": "우아한청년들", "careers_url": "https://career.woowayouths.com" },
-    { "key": "line",       "name": "라인",        "careers_url": "https://careers.linecorp.com" },
-    { "key": "kakaopay",   "name": "카카오페이",   "careers_url": "https://kakaopay.career.greetinghr.com" },
-    { "key": "kakaobank",  "name": "카카오뱅크",   "careers_url": "https://recruit.kakaobank.com" },
-    { "key": "daangn",     "name": "당근",        "careers_url": "https://about.daangn.com/jobs" },
-    { "key": "webtoon",    "name": "네이버웹툰",   "careers_url": "https://recruit.webtoonscorp.com" },
-    { "key": "moloco",     "name": "몰로코",      "careers_url": "https://www.moloco.com/careers" },
-    { "key": "sendbird",   "name": "센드버드",    "careers_url": "https://sendbird.com/careers" }
+    { "key": "toss",       "name": "토스",        "group": null,    "region": "metro", "careers_url": "https://toss.im/career" },
+    { "key": "coupang",    "name": "쿠팡",        "group": null,    "region": "metro", "careers_url": "https://www.coupang.jobs" },
+    { "key": "baemin",     "name": "우아한형제들", "group": null,    "region": "metro", "careers_url": "https://career.woowahan.com" },
+    { "key": "woowa",      "name": "우아한청년들", "group": null,    "region": "metro", "careers_url": "https://career.woowayouths.com" },
+    { "key": "naver",      "name": "네이버",      "group": "naver", "region": "metro", "careers_url": "https://recruit.navercorp.com" },
+    { "key": "webtoon",    "name": "네이버웹툰",   "group": "naver", "region": "metro", "careers_url": "https://recruit.webtoonscorp.com" },
+    { "key": "line",       "name": "라인",        "group": "naver", "region": "metro", "careers_url": "https://careers.linecorp.com" },
+    { "key": "kakao",      "name": "카카오",      "group": "kakao", "region": "metro", "careers_url": "https://careers.kakao.com" },
+    { "key": "kakaopay",   "name": "카카오페이",   "group": "kakao", "region": "metro", "careers_url": "https://kakaopay.career.greetinghr.com" },
+    { "key": "kakaobank",  "name": "카카오뱅크",   "group": "kakao", "region": "metro", "careers_url": "https://recruit.kakaobank.com" },
+    { "key": "daangn",     "name": "당근",        "group": null,    "region": "metro", "careers_url": "https://about.daangn.com/jobs" },
+    { "key": "moloco",     "name": "몰로코",      "group": null,    "region": "metro", "careers_url": "https://www.moloco.com/careers" },
+    { "key": "sendbird",   "name": "센드버드",    "group": null,    "region": "metro", "careers_url": "https://sendbird.com/careers" }
   ],
   "global": [
-    { "key": "anthropic",  "name": "Anthropic",  "careers_url": "https://www.anthropic.com/careers/jobs" },
-    { "key": "openai",     "name": "OpenAI",     "careers_url": "https://openai.com/careers/search/" },
-    { "key": "disney",     "name": "Disney",     "careers_url": "https://www.disneycareers.com" }
+    { "key": "anthropic",  "name": "Anthropic",  "group": null,    "region": "global", "careers_url": "https://www.anthropic.com/careers/jobs" },
+    { "key": "openai",     "name": "OpenAI",     "group": null,    "region": "global", "careers_url": "https://openai.com/careers/search/" },
+    { "key": "disney",     "name": "Disney",     "group": null,    "region": "global", "careers_url": "https://www.disneycareers.com" }
   ]
 }
