@@ -46,6 +46,22 @@ from jobradar_jobs where status = 'open' order by company_key, tier;
 - 각 후보 공고마다 **실제 공고 페이지 URL**을 확보하고, 그 URL이 0)의 도메인 규칙을 만족하는지 확인한다.
 - 만족하지 못하면 버린다. (개수를 못 채워도 됨 — 정확도가 개수보다 중요하다.)
 
+**회사별 검증 힌트(적중률 향상).** 자체 도메인 검색으로 안 나오면 아래 ATS도 확인한다:
+
+| 회사 | 채용 도메인 / ATS |
+|------|------------------|
+| baemin (우아한형제들) | career.woowahan.com (자체) |
+| woowa (우아한청년들) | career.woowayouths.com (자체) |
+| sendbird (센드버드) | boards.greenhouse.io/sendbird (Greenhouse) |
+| moloco (몰로코) | moloco.com/careers (Greenhouse 연동) |
+| kakaopay | kakaopay.career.greetinghr.com (Greetinghr) |
+| toss | toss.im/career/jobs (자체) |
+| daangn | about.daangn.com/jobs (Greenhouse 연동) |
+| naver | recruit.navercorp.com (자체) |
+| kakao | careers.kakao.com (자체) |
+
+baemin·woowa·sendbird는 직무명이 `서비스기획자`, `프로덕트 오너(PO)`, `Product Manager`로 다양하니 **여러 표기로 검색**한다.
+
 각 검증된 공고를 다음 필드로 매핑한다:
 
 | 필드 | 규칙 |
@@ -61,6 +77,11 @@ from jobradar_jobs where status = 'open' order by company_key, tier;
 | `fit_score` | PM·기획 적합도 0~100. 핵심 PM/PO=80~95, 운영기획/주니어=60~79, 인접직무=40~59 |
 | `status` | 검증된 공고는 `'open'`. (검증 실패 건은 아예 넣지 않음) |
 | `week_label` | `<WEEK>` |
+
+**품질 기준 (균형 유지):**
+- **fit_score 하한**: `fit_score < 55`인 공고는 넣지 않는다. 단 tier 1(인턴/신입)은 `>= 50`이면 허용.
+- **회사당 상한 8건**: 한 회사에서 검증된 공고가 8건을 넘으면 **fit_score 상위 8건만** upsert한다
+  (글로벌 대형사가 보드를 독점하지 않도록). 동점이면 최신(posted_at) 우선.
 
 ## 4) Upsert (Supabase MCP `execute_sql`, 쓰기)
 
@@ -95,6 +116,21 @@ set status = 'closed', updated_at = now()
 where status = 'open'
   and week_label is distinct from '<WEEK>'
   and (deadline is null or deadline < '<TODAY>');
+```
+
+그리고 **회사당 상한 8건 안전장치** — 혹시 8건을 넘겨 들어왔다면 fit_score 하위부터 닫는다:
+
+```sql
+with ranked as (
+  select id,
+         row_number() over (partition by company_key
+           order by fit_score desc nulls last, posted_at desc) rn
+  from jobradar_jobs where status = 'open'
+)
+update jobradar_jobs j
+set status = 'closed', updated_at = now()
+from ranked r
+where j.id = r.id and r.rn > 8;
 ```
 
 ## 6) 검증 & 보고
