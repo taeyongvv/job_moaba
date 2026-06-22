@@ -3,8 +3,8 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import {
   TIERS,
-  GROUPS,
   REGIONS,
+  COMPANY_FILTER,
   groupOf,
   regionOf,
   formatDeadline,
@@ -23,34 +23,8 @@ export default function JobsBoard({ jobs }: { jobs: Job[] }) {
   const [activeTier, setActiveTier] = useState<"all" | Tier>("all");
   const [query, setQuery] = useState("");
 
-  // 칩에 쓸 회사 목록 (등장 순서 유지)
-  const companies = useMemo(() => {
-    const seen = new Map<string, { name: string; color: string }>();
-    jobs.forEach((j) => {
-      if (!seen.has(j.company_key))
-        seen.set(j.company_key, { name: j.company_name, color: j.brand_color });
-    });
-    return [...seen.entries()].map(([key, v]) => ({ key, ...v }));
-  }, [jobs]);
-
-  // 회사 칩: 그룹사(카카오·네이버 계열)는 하나의 "그룹" 칩으로 묶어서 노출
-  const companyChips = useMemo(() => {
-    const out: { kind: "co" | "grp"; key: string; name: string; color: string }[] = [];
-    const seenGroup = new Set<string>();
-    companies.forEach((c) => {
-      const g = groupOf(c.key);
-      if (g) {
-        if (seenGroup.has(g)) return;
-        seenGroup.add(g);
-        const meta = GROUPS.find((x) => x.key === g)!;
-        // 계열사를 묶어 하나의 회사("카카오"/"네이버")처럼 노출 (별도 그룹 카테고리 없이)
-        out.push({ kind: "grp", key: g, name: meta.label, color: meta.color });
-      } else {
-        out.push({ kind: "co", key: c.key, name: c.name, color: c.color });
-      }
-    });
-    return out;
-  }, [companies]);
+  // 회사 칩은 고정 목록(네카라쿠배당토 + 글로벌 3사)을 항상 노출
+  const companyChips = COMPANY_FILTER;
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();

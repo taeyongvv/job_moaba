@@ -57,6 +57,21 @@ const GROUP_OF: Record<string, GroupKey> = GROUPS.reduce(
 export const groupOf = (companyKey: string): GroupKey | null =>
   GROUP_OF[companyKey] ?? null;
 
+// 회사 필터에 항상 노출하는 고정 목록 — 네카라쿠배당토(라인은 네이버 그룹에 포함) + 글로벌 3사.
+// 공고가 0건인 회사도 칩은 항상 보이게 한다(데이터 의존 X).
+// kind 'grp'는 계열사를 묶은 단일 칩(네이버=naver/webtoon/line, 카카오=kakao/kakaopay/kakaobank).
+export const COMPANY_FILTER: { kind: "co" | "grp"; key: string; name: string; color: string }[] = [
+  { kind: "co", key: "toss", name: "토스", color: "#3182F6" },
+  { kind: "co", key: "coupang", name: "쿠팡", color: "#C81E2E" },
+  { kind: "co", key: "baemin", name: "배민", color: "#2AC1BC" },
+  { kind: "grp", key: "naver", name: "네이버", color: "#03C75A" },
+  { kind: "grp", key: "kakao", name: "카카오", color: "#FEE500" },
+  { kind: "co", key: "daangn", name: "당근", color: "#FF6F0F" },
+  { kind: "co", key: "anthropic", name: "Anthropic", color: "#CC785C" },
+  { kind: "co", key: "openai", name: "OpenAI", color: "#10A37F" },
+  { kind: "co", key: "disney", name: "Disney", color: "#2B49C9" },
+];
+
 // ── 근무지(지역) 필터 ─────────────────────────────────────────
 // global = is_global, metro = 국내 수도권(서울·경기), domestic = 국내 비수도권.
 // 서울·경기(metro)는 국내(domestic 포함)의 부분집합으로 취급한다.
@@ -64,8 +79,8 @@ export type Region = "metro" | "domestic" | "global";
 
 // 국내사 중 수도권(서울·경기)에 주 근무지가 있는 회사. (글로벌사는 is_global로 자동 분류)
 const METRO_COMPANIES = new Set<string>([
-  "toss", "coupang", "baemin", "woowa", "line", "kakao", "kakaopay",
-  "kakaobank", "daangn", "webtoon", "naver", "moloco", "sendbird",
+  "toss", "coupang", "baemin", "line", "kakao", "kakaopay",
+  "kakaobank", "daangn", "webtoon", "naver",
 ]);
 
 export const REGIONS: { id: "all" | Region; label: string }[] = [
@@ -81,6 +96,16 @@ export function regionOf(job: Pick<Job, "is_global" | "company_key">): Region {
   return METRO_COMPANIES.has(job.company_key) ? "metro" : "domestic";
 }
 
+// 보드에 노출하는 정규 회사 집합 — 네카라쿠배당토(계열사 포함) + 글로벌 3사.
+// 이 집합 밖(예: 몰로코·센드버드·우아한청년들)의 공고는 화면에서 제외한다.
+export const TRACKED_COMPANIES = new Set<string>([
+  "toss", "coupang", "baemin",
+  "naver", "webtoon", "line",
+  "kakao", "kakaopay", "kakaobank",
+  "daangn",
+  "anthropic", "openai", "disney",
+]);
+
 export async function getJobs(): Promise<Job[]> {
   const { data, error } = await supabase
     .from("jobradar_v_jobs")
@@ -90,7 +115,7 @@ export async function getJobs(): Promise<Job[]> {
     .order("posted_at", { ascending: false });
 
   if (error) throw new Error(`[jobradar] ${error.message}`);
-  return (data ?? []) as Job[];
+  return ((data ?? []) as Job[]).filter((j) => TRACKED_COMPANIES.has(j.company_key));
 }
 
 /** 'YYYY-MM-DD' -> 'MM/DD' */

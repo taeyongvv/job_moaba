@@ -17,7 +17,7 @@ upsert하여 `/jobs` 페이지를 최신 상태로 유지한다.
 2. **마감일을 지어내지 않는다.** 명시된 마감일을 확인 못 하면 `deadline = null`(상시)로 둔다.
 3. 범위는 **PM / 서비스기획 / Product Manager / Product Owner / 프로덕트 기획** 직무로 한정.
    엔지니어링·디자인·마케팅 단독 공고는 제외.
-4. 회사 범위는 `automation/companies.json`의 회사들로 한정한다(현재 16개사). (FK 제약: `company_key`는
+4. 회사 범위는 `automation/companies.json`의 회사들로 한정한다(현재 13개사 — 네카라쿠배당토 + 글로벌 3사). (FK 제약: `company_key`는
    `jobradar_companies.key`에 존재해야 함.) 새 회사를 추가하려면 먼저 `jobradar_companies`에 INSERT.
    `group`/`region` 필드는 프론트 필터용 분류일 뿐, 공고 upsert 시에는 `company_key`만 정확하면 된다.
 5. 쓰기 전 항상 현재 스키마/데이터를 한 번 조회해 가정을 확인한다.
